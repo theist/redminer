@@ -1,0 +1,79 @@
+#!/usr/bin/env ruby
+
+require 'rubygems'
+require 'active_resource'
+require 'thor'
+require 'tempfile'
+require 'colorize'
+require 'terminfo'
+
+class Options
+  attr_accessor :url
+  attr_accessor :api_key
+  attr_accessor :my_id
+  attr_accessor :my_group_id
+end
+
+option = Options.new
+
+if File.exist?("#{ENV['HOME']}/.redminer/options")
+  File.new("#{ENV['HOME']}/.redminer/options").readlines.each {|line| eval line}
+end
+
+$options = option.clone
+
+COLS = TermInfo.screen_columns
+
+class Common < ActiveResource::Base
+  self.site = $options.url
+  self.user = $options.api_key
+  self.password = $options.api_key
+  self.format = :xml
+end
+
+class Issue < Common; end
+class Issue_status < Common; end
+class Group < Common; end
+class User < Common; end
+class Project < Common; end
+
+class MainThorCommand < Thor
+  desc "list", "List tickets"
+  def list
+    new_group = Issue.find(:all,:params=>{:sort =>'updated_on:desc', :limit => 100, :assigned_to_id=> $options.my_group_id,:status_id => 1})
+    new = Issue.find(:all,:params=>{:sort =>'updated_on:desc', :limit => 100, :assigned_to_id=> $options.my_id,:status_id => 1})
+    assigned = Issue.find(:all,:params=>{:sort =>'updated_on:desc', :limit => 100, :assigned_to_id=> $options.my_id,:status_id => 2})
+    comments = Issue.find(:all,:params=>{:sort =>'updated_on:desc', :limit => 100, :assigned_to_id=> $options.my_id,:status_id => 4})
+    locked = Issue.find(:all,:params=>{:sort =>'updated_on:desc', :limit => 100, :assigned_to_id=> $options.my_id,:status_id => 7})
+
+    tickets = new_group + new + locked + comments + assigned
+    tickets.each do |ticket|
+      puts "["+"#{ticket.id}".green +
+           "]["+"#{ticket.project.name}".yellow +
+           "]["+"#{ticket.status.name}".green +
+           "]["+"#{ticket.assigned_to.name}".blue +
+           "]["+"#{ticket.priority.name}".red + "]#{ticket.subject}"
+    end
+  end
+
+  desc "read", "Read Ticket journal"
+  method_option :all, :type => :boolean, :aliases => '-a', :default => false, :desc => 'Shows all ticket updates'
+  method_option :last, :type => :boolean, :aliases => '-l', :default => false, :desc => 'Shows last update'
+  def read(issue_id)
+    target = Issue.find(issue_id) unless options.last or options.all;
+    target = Issue.find(issue_id, :params=>{:include=>'journals'}) if options.last or options.all;
+    puts "-".green * COLS
+    puts "[##{issue_id}]".green + "    #{target.subject}".white;
+    puts "-".green * COLS
+    puts "Autor:      ".green + "#{target.author.name}".red
+    puts "Asignado a: ".green + "#{target.assigned_to.name}".red
+    puts "Estado:     ".green + "#{target.status.name}".red
+    puts "Prioridad:  ".green + "#{target.priority.name}".red
+    puts "-".green * COLS
+    puts "#{target.description}"
+    puts "-".green * COLS
+  end
+end
+
+MainThorCommand.start
+
