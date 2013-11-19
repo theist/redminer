@@ -1,7 +1,7 @@
 Redminer
 ========
 
-This is a small redmine REST api command line client which I developed to my personal use and my ruby skills. It won't be fit for any purpose, surely.
+This is a small redmine REST api command line client which I developed to my personal use and to train my ruby skills. It won't be fit for any purpose, surely.
 
 Also this isn't related to "Redminer DROID" android client, this is only a name clash issue.
 
