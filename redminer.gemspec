@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
   s.executables = %w(redminer)
   s.files = manifest
   s.summary = "My redmine client"
-  s.add_dependency('activeresource')
+  s.add_dependency('activeresource', "~>3.2")
   s.add_dependency('colorize')
   s.add_dependency('thor')
   s.add_dependency('ruby-terminfo')
