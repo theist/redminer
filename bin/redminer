@@ -72,6 +72,8 @@ class MainThorCommand < Thor
     puts "-".green * COLS
     puts "#{target.description}"
     puts "-".green * COLS
+    puts "#{$options.url}/issues/#{issue_id}".blue
+    puts "-".green * COLS
   end
 end
 
