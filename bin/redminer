@@ -63,12 +63,13 @@ class MainThorCommand < Thor
     target = Issue.find(issue_id) unless options.last or options.all;
     target = Issue.find(issue_id, :params=>{:include=>'journals'}) if options.last or options.all;
     puts "-".green * COLS
-    puts "[##{issue_id}]".green + "    #{target.subject}".white;
+    puts "[#{target.tracker.name}]".blue + "[##{issue_id}]".green + "    #{target.subject}".white;
     puts "-".green * COLS
     puts "Autor:      ".green + "#{target.author.name}".red
     puts "Asignado a: ".green + "#{target.assigned_to.name}".red
     puts "Estado:     ".green + "#{target.status.name}".red
     puts "Prioridad:  ".green + "#{target.priority.name}".red
+    puts "Categoria:  ".green + "#{target.category.name}".red
     puts "-".green * COLS
     puts "#{target.description}"
     puts "-".green * COLS
