@@ -76,6 +76,10 @@ class MainThorCommand < Thor
     puts "#{$options.url}/issues/#{issue_id}".blue
     puts "-".green * COLS
   end
+  desc "open", "Open file in browser"
+  def open(issue_id)
+    system "xdg-open #{$options.url}/issues/#{issue_id}"
+  end
 end
 
 MainThorCommand.start
