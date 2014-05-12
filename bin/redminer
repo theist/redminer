@@ -78,7 +78,7 @@ class MainThorCommand < Thor
   end
   desc "open", "Open file in browser"
   def open(issue_id)
-    spawn "xdg-open #{$options.url}/issues/#{issue_id}"
+    spawn("xdg-open #{$options.url}/issues/#{issue_id}", [:out,:err]=>'/dev/null')
   end
 end
 
