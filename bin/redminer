@@ -6,6 +6,7 @@ require 'thor'
 require 'tempfile'
 require 'colorize'
 require 'terminfo'
+require 'httparty'
 
 class Options
   attr_accessor :url
@@ -31,6 +32,12 @@ class Common < ActiveResource::Base
   self.format = :xml
 end
 
+class Wiki
+  include HTTParty
+  base_uri  $options.url
+  basic_auth $options.api_key, $options.api_key 
+end
+
 class Issue < Common; end
 class Issue_status < Common; end
 class Group < Common; end
@@ -38,6 +45,25 @@ class User < Common; end
 class Project < Common; end
 
 class MainThorCommand < Thor
+  desc "wiki", "read wiki pages"
+  def wiki (page=nil, project=nil)
+    prj = project || 'sistemas'
+    list_json = Wiki.get("/projects/#{prj}/wiki/index.xml")
+    if page and page != 'list'
+      w_page = Wiki.get("/projects/#{prj}/wiki/#{page}.xml")
+      puts "-".green * COLS
+      puts w_page['wiki_page']['title'].blue
+      puts "-".green * COLS
+      puts w_page['wiki_page']['text']
+      puts "-".green * COLS
+      puts "#{w_page['wiki_page']['author']['name']} #{w_page['wiki_page']['updated_on']}".yellow
+      puts "#{$options.url}/projects/#{prj}/wiki/#{page}".blue
+      puts "-".green * COLS
+    else
+      list_json['wiki_pages'].each  {|item| puts "#{item['title']}"}
+    end
+  end
+
   desc "list", "List tickets"
   def list
     new_group = Issue.find(:all,:params=>{:sort =>'updated_on:desc', :limit => 100, :assigned_to_id=> $options.my_group_id,:status_id => 1})
