@@ -13,4 +13,5 @@ Gem::Specification.new do |s|
   s.add_dependency('colorize')
   s.add_dependency('thor')
   s.add_dependency('ruby-terminfo')
+  s.add_dependency('httparty')
 end
