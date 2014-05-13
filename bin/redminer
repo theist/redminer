@@ -48,10 +48,20 @@ class MainThorCommand < Thor
   desc "wiki", "read wiki pages"
   def wiki (page=nil, project=nil)
     prj = project || 'sistemas'
+    puts "-".green * COLS
     list_json = Wiki.get("/projects/#{prj}/wiki/index.xml")
+    if list_json.nil? or list_json.empty?
+        puts "No Such Wiki"
+        puts "-".green * COLS
+        return
+    end
     if page and page != 'list'
       w_page = Wiki.get("/projects/#{prj}/wiki/#{page}.xml")
-      puts "-".green * COLS
+      if w_page.nil? or w_page.empty?
+        puts "No Such page or wiki"
+        puts "-".green * COLS
+        return
+      end
       puts w_page['wiki_page']['title'].blue
       puts "-".green * COLS
       puts w_page['wiki_page']['text']
